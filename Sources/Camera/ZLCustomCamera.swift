@@ -217,6 +217,8 @@ open class ZLCustomCamera: UIViewController {
     
     private var isCapturePending = false
     
+    private var shouldRestartSessionAfterBecomeActive = false
+    
     private lazy var focusCursorTapGes: UITapGestureRecognizer = {
         let tap = UITapGestureRecognizer()
         tap.addTarget(self, action: #selector(adjustFocusPoint))
@@ -711,9 +713,9 @@ open class ZLCustomCamera: UIViewController {
     
     private func addNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(appWillResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         
         if cameraConfig.allowRecordVideo {
-            NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionInterruption), name: AVAudioSession.interruptionNotification, object: nil)
         }
     }
@@ -816,7 +818,16 @@ open class ZLCustomCamera: UIViewController {
 
     @objc private func appWillResignActive() {
         if session.isRunning {
-            dismiss(animated: true, completion: nil)
+            if cameraConfig.dismissWhenAppResignActive {
+                dismiss(animated: true) {
+                    self.cancelBlock?()
+                }
+            } else {
+                shouldRestartSessionAfterBecomeActive = true
+                sessionQueue.async {
+                    self.session.stopRunning()
+                }
+            }
         }
         if videoURL != nil, let player = recordVideoPlayerLayer?.player {
             player.pause()
@@ -824,6 +835,12 @@ open class ZLCustomCamera: UIViewController {
     }
     
     @objc private func appDidBecomeActive() {
+        if shouldRestartSessionAfterBecomeActive {
+            shouldRestartSessionAfterBecomeActive = false
+            sessionQueue.async {
+                self.session.startRunning()
+            }
+        }
         if videoURL != nil, let player = recordVideoPlayerLayer?.player {
             player.play()
         }

@@ -91,6 +91,10 @@ public class ZLCameraConfiguration: NSObject {
     /// Whether to support switch camera. Defaults to true.
     public var allowSwitchCamera = true
     
+    /// Whether to dismiss custom camera when the app resigns active. Defaults to true.
+    /// If true, `ZLCustomCamera.cancelBlock` will be called after dismissing.
+    public var dismissWhenAppResignActive = true
+    
     /// Flag to enable tap-to-record functionality. Default is false.
     /// Note: This property is prioritized lower than `allowTakePhoto`.
     /// If `allowTakePhoto` is true, `tapToRecordVideo` will be ignored.
@@ -309,6 +313,12 @@ public extension ZLCameraConfiguration {
     @discardableResult
     func allowSwitchCamera(_ value: Bool) -> ZLCameraConfiguration {
         allowSwitchCamera = value
+        return self
+    }
+    
+    @discardableResult
+    func dismissWhenAppResignActive(_ value: Bool) -> ZLCameraConfiguration {
+        dismissWhenAppResignActive = value
         return self
     }
     
