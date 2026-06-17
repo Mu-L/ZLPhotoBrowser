@@ -53,7 +53,7 @@ class ZLEmbedAlbumListView: UIView {
     
     var hideBlock: (() -> Void)?
     
-    private var orientation: UIInterfaceOrientation = UIApplication.shared.statusBarOrientation
+    private var orientation: UIInterfaceOrientation = UIApplication.shared.zl.interfaceOrientation
     
     init(selectedAlbum: ZLAlbumListModel?) {
         self.selectedAlbum = selectedAlbum
@@ -69,16 +69,7 @@ class ZLEmbedAlbumListView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        let currOri = UIApplication.shared.statusBarOrientation
-        
-        guard currOri != orientation else {
-            return
-        }
-        orientation = currOri
-        
-        guard !isHidden else {
-            return
-        }
+        guard !isHidden else { return }
         
         let bgFrame = calculateBgViewBounds()
         
@@ -127,7 +118,7 @@ class ZLEmbedAlbumListView: UIView {
         let contentH = CGFloat(arrDataSource.count) * ZLEmbedAlbumListView.rowH
         
         let maxH: CGFloat
-        if UIApplication.shared.statusBarOrientation.isPortrait {
+        if UIApplication.shared.zl.isPortrait {
             maxH = min(frame.height * 0.7, contentH)
         } else {
             maxH = min(frame.height * 0.8, contentH)

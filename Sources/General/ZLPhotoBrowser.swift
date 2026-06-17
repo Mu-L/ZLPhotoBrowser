@@ -69,6 +69,7 @@ extension PHAsset: ZLPhotoBrowserCompatible { }
 extension PHPhotoLibrary: ZLPhotoBrowserCompatible { }
 extension UIFont: ZLPhotoBrowserCompatible { }
 extension UIView: ZLPhotoBrowserCompatible { }
+extension UIApplication: ZLPhotoBrowserCompatible { }
 extension UIGraphicsImageRenderer: ZLPhotoBrowserCompatible { }
 extension AVCaptureDevice: ZLPhotoBrowserCompatible { }
 

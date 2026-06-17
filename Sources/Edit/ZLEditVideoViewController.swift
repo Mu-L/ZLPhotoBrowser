@@ -170,6 +170,8 @@ public class ZLEditVideoViewController: UIViewController {
     
     private var requestFailedFrameImageIndex: Set<Int> = Set()
     
+    private var isFirstLayout = true
+    
     private var shouldLayout = true
     
     private lazy var generator: AVAssetImageGenerator = {
@@ -195,11 +197,14 @@ public class ZLEditVideoViewController: UIViewController {
     
     public var cancelEditBlock: (() -> Void)?
     
-    override public var prefersStatusBarHidden: Bool {
-        return true
-    }
+    override public var prefersStatusBarHidden: Bool { true }
     
-    override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+    override public var prefersHomeIndicatorAutoHidden: Bool { true }
+    
+    /// 延缓屏幕上下方通知栏弹出，避免手势冲突
+    override public var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { [.top, .bottom] }
+    
+    public override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         deviceIsiPhone() ? .portrait : .all
     }
     
@@ -260,9 +265,8 @@ public class ZLEditVideoViewController: UIViewController {
     
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        guard shouldLayout else {
-            return
-        }
+        guard shouldLayout else { return }
+        
         shouldLayout = false
         
         zl_debugPrint("edit video layout subviews")
@@ -289,6 +293,7 @@ public class ZLEditVideoViewController: UIViewController {
         
         collectionView.frame = CGRect(x: 0, y: doneBtn.frame.minY - bottomBtnAndColSpacing - Layout.frameImageSize.height, width: view.bounds.width, height: Layout.frameImageSize.height)
         overlayView.frame = collectionView.frame
+        collectionView.collectionViewLayout.invalidateLayout()
         
         let frameViewW = Layout.frameImageSize.width * 10
         frameImageBorderView.frame = CGRect(x: (view.bounds.width - frameViewW) / 2, y: collectionView.frame.minY, width: frameViewW, height: Layout.frameImageSize.height)
@@ -345,6 +350,16 @@ public class ZLEditVideoViewController: UIViewController {
         frameImageBorderView.validRect = frameImageBorderView.convert(clipRect(), from: view)
         durationLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 20)
         updateSubviewStatus()
+        
+        if !isFirstLayout {
+            startTimer()
+        }
+        isFirstLayout = false
+    }
+    
+    override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        shouldLayout = true
     }
     
     private func setupUI() {

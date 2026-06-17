@@ -173,6 +173,10 @@ class ZLPhotoPreviewController: UIViewController {
     
     private var orientation: UIInterfaceOrientation = .unknown
     
+    private var isAdjustingCollectionLayout = false
+    
+    private var lastCollectionViewSize: CGSize = .zero
+    
     /// 是否在点击确定时候，当未选择任何照片时候，自动选择当前index的照片
     var autoSelectCurrentIfNotSelectAnyone = true
     
@@ -264,23 +268,45 @@ class ZLPhotoPreviewController: UIViewController {
         
         refreshBottomViewFrame()
         
-        let ori = UIApplication.shared.statusBarOrientation
-        if ori != orientation {
+        let ori = UIApplication.shared.zl.interfaceOrientation
+        let collectionViewSize = collectionView.bounds.size
+        if !isAdjustingCollectionLayout, ori != orientation || collectionViewSize != lastCollectionViewSize {
             orientation = ori
-
-            collectionView.setContentOffset(
-                CGPoint(
-                    x: (view.zl.width + ZLPhotoPreviewController.colItemSpacing) * CGFloat(indexBeforOrientationChanged),
-                    y: 0
-                ),
-                animated: false
-            )
+            lastCollectionViewSize = collectionViewSize
+            resetCollectionViewLayoutAndOffset()
         }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        collectionView.collectionViewLayout.invalidateLayout()
+        indexBeforOrientationChanged = currentIndex
+        isAdjustingCollectionLayout = true
+        
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            self?.resetCollectionViewLayoutAndOffset(width: size.width + ZLPhotoPreviewController.colItemSpacing)
+        }, completion: { [weak self] _ in
+            guard let `self` else { return }
+            self.resetCollectionViewLayoutAndOffset()
+            self.isAdjustingCollectionLayout = false
+            self.orientation = UIApplication.shared.zl.interfaceOrientation
+            self.lastCollectionViewSize = self.collectionView.bounds.size
+            self.reloadCurrentCell()
+        })
+    }
+    
+    private func resetCollectionViewLayoutAndOffset(width: CGFloat? = nil) {
+        let pageWidth = width ?? collectionView.bounds.width
+        let maxIndex = max(0, arrDataSources.count - 1)
+        indexBeforOrientationChanged = min(indexBeforOrientationChanged, maxIndex)
+        
+        UIView.performWithoutAnimation {
+            collectionView.collectionViewLayout.invalidateLayout()
+            collectionView.layoutIfNeeded()
+            collectionView.setContentOffset(
+                CGPoint(x: pageWidth * CGFloat(indexBeforOrientationChanged), y: 0),
+                animated: false
+            )
+        }
     }
     
     private func reloadCurrentCell() {
@@ -880,7 +906,7 @@ extension ZLPhotoPreviewController: UINavigationControllerDelegate {
 
 extension ZLPhotoPreviewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView == collectionView else {
+        guard scrollView == collectionView, !isAdjustingCollectionLayout else {
             return
         }
         

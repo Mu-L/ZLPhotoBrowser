@@ -159,6 +159,10 @@ public class ZLImagePreviewController: UIViewController {
     
     private var orientation: UIInterfaceOrientation = .unknown
     
+    private var isAdjustingCollectionLayout = false
+    
+    private var lastCollectionViewSize: CGSize = .zero
+    
     private var imageRequestID: PHImageRequestID?
     
     private var urlDownloadTask: URLSessionDownloadTask?
@@ -263,9 +267,9 @@ public class ZLImagePreviewController: UIViewController {
         insets.top = max(20, insets.top)
         
         collectionView.frame = CGRect(
-            x: -ZLPhotoPreviewController.colItemSpacing / 2,
+            x: -ZLImagePreviewController.colItemSpacing / 2,
             y: 0,
-            width: view.zl.width + ZLPhotoPreviewController.colItemSpacing,
+            width: view.zl.width + ZLImagePreviewController.colItemSpacing,
             height: view.zl.height
         )
         
@@ -290,22 +294,46 @@ public class ZLImagePreviewController: UIViewController {
         
         resetBottomViewFrame()
         
-        let ori = UIApplication.shared.statusBarOrientation
-        if ori != orientation {
+        let ori = UIApplication.shared.zl.interfaceOrientation
+        let collectionViewSize = collectionView.bounds.size
+        if !isAdjustingCollectionLayout, ori != orientation || collectionViewSize != lastCollectionViewSize {
             orientation = ori
-            collectionView.setContentOffset(
-                CGPoint(
-                    x: (view.zl.width + ZLPhotoPreviewController.colItemSpacing) * CGFloat(indexBeforOrientationChanged),
-                    y: 0
-                ),
-                animated: false
-            )
+            lastCollectionViewSize = collectionViewSize
+            resetCollectionViewLayoutAndOffset()
         }
     }
     
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        collectionView.collectionViewLayout.invalidateLayout()
+        
+        indexBeforOrientationChanged = currentIndex
+        isAdjustingCollectionLayout = true
+        
+        coordinator.animate(alongsideTransition: { [weak self] _ in
+            self?.resetCollectionViewLayoutAndOffset(width: size.width + ZLImagePreviewController.colItemSpacing)
+        }, completion: { [weak self] _ in
+            guard let `self` else { return }
+            self.resetCollectionViewLayoutAndOffset()
+            self.isAdjustingCollectionLayout = false
+            self.orientation = UIApplication.shared.zl.interfaceOrientation
+            self.lastCollectionViewSize = self.collectionView.bounds.size
+            self.reloadCurrentCell()
+        })
+    }
+    
+    private func resetCollectionViewLayoutAndOffset(width: CGFloat? = nil) {
+        let pageWidth = width ?? collectionView.bounds.width
+        let maxIndex = max(0, datas.count - 1)
+        indexBeforOrientationChanged = min(indexBeforOrientationChanged, maxIndex)
+        
+        UIView.performWithoutAnimation {
+            collectionView.collectionViewLayout.invalidateLayout()
+            collectionView.layoutIfNeeded()
+            collectionView.setContentOffset(
+                CGPoint(x: pageWidth * CGFloat(indexBeforOrientationChanged), y: 0),
+                animated: false
+            )
+        }
     }
     
     private func reloadCurrentCell() {
@@ -519,7 +547,7 @@ extension ZLImagePreviewController: UIViewControllerTransitioningDelegate {
 
 public extension ZLImagePreviewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView == collectionView else {
+        guard scrollView == collectionView, !isAdjustingCollectionLayout else {
             return
         }
         
@@ -527,7 +555,7 @@ public extension ZLImagePreviewController {
         
         NotificationCenter.default.post(name: ZLPhotoPreviewController.previewVCScrollNotification, object: nil)
         let offset = scrollView.contentOffset
-        var page = Int(round(offset.x / (view.bounds.width + ZLPhotoPreviewController.colItemSpacing)))
+        var page = Int(round(offset.x / (view.bounds.width + ZLImagePreviewController.colItemSpacing)))
         page = max(0, min(page, datas.count - 1))
         if page == currentIndex {
             return

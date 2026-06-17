@@ -317,8 +317,7 @@ class ZLThumbnailViewController: UIViewController {
         let navViewFrame = CGRect(x: 0, y: 0, width: view.frame.width, height: insets.top + navViewNormalH)
         externalNavView?.frame = navViewFrame
         embedNavView?.frame = navViewFrame
-        
-        embedAlbumListView?.frame = CGRect(x: 0, y: navViewFrame.maxY, width: view.bounds.width, height: view.bounds.height - navViewFrame.maxY)
+        embedAlbumListView?.frame = CGRect(x: 0, y: navViewFrame.maxY, width: view.zl.width, height: view.zl.height - navViewFrame.maxY)
         
         let showBottomToolBtns = shouldShowBottomToolBar()
         
@@ -598,7 +597,7 @@ class ZLThumbnailViewController: UIViewController {
             insets = deviceSafeAreaInsets()
         }
         
-        if UIApplication.shared.statusBarOrientation.isLandscape {
+        if UIApplication.shared.zl.isLandscape {
             let colViewW1 = view.zl.width - insets.left - insets.right
             let colViewW2 = view.zl.height
             albumList.columnCounts = (getColumnCount(totalWidth: colViewW2), getColumnCount(totalWidth: colViewW1))
@@ -1298,7 +1297,7 @@ extension ZLThumbnailViewController: UICollectionViewDataSource, UICollectionVie
         } else {
             let defaultCount = uiConfig.columnCount
             columnCount = deviceIsiPad() ? (defaultCount + 2) : defaultCount
-            if UIApplication.shared.statusBarOrientation.isLandscape {
+            if UIApplication.shared.zl.isLandscape {
                 columnCount += 2
             }
         }

@@ -97,14 +97,14 @@ func deviceSafeAreaInsets() -> UIEdgeInsets {
     var insets: UIEdgeInsets = .zero
     
     if #available(iOS 11, *) {
-        insets = UIApplication.shared.keyWindow?.safeAreaInsets ?? .zero
+        insets = UIApplication.shared.zl.activeWindow?.safeAreaInsets ?? .zero
     }
     
     return insets
 }
 
 func deviceIsFringeScreen() -> Bool {
-    if UIApplication.shared.statusBarOrientation.isLandscape {
+    if UIApplication.shared.zl.isLandscape {
         return deviceSafeAreaInsets().left > 0 || deviceSafeAreaInsets().right > 0
     } else {
         return deviceSafeAreaInsets().top > 20
@@ -139,7 +139,7 @@ func showAlertController(title: String?, message: String?, style: ZLCustomAlertS
         .map { $0.toSystemAlertAction() }
         .forEach { alert.addAction($0) }
     
-    let presentedVC = sender ?? UIApplication.shared.keyWindow?.rootViewController
+    let presentedVC = sender ?? UIApplication.shared.zl.activeWindow?.rootViewController
     
     if deviceIsiPad() {
         alert.popoverPresentationController?.sourceView = presentedVC?.view

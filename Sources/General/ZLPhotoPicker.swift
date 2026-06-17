@@ -57,7 +57,7 @@ public class ZLPhotoPicker: NSObject {
     @objc public var cancelBlock: (() -> Void)?
     
     deinit {
-        zlLoggerInDebug("ZLPhotoPicker deinit")
+        zl_debugPrint("ZLPhotoPicker deinit")
     }
     
     @objc override public init() {

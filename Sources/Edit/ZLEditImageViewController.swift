@@ -583,9 +583,8 @@ open class ZLEditImageViewController: UIViewController {
     
     override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        guard shouldLayout else {
-            return
-        }
+        guard shouldLayout else { return }
+        
         shouldLayout = false
         zl_debugPrint("edit image layout subviews")
         var insets = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
@@ -594,27 +593,31 @@ open class ZLEditImageViewController: UIViewController {
         }
         insets.top = max(20, insets.top)
         
-        mainScrollView.frame = view.bounds
+        // 适配iPad，如果在其他界面改变了窗口大小，然后返回该界面时候，view.bounds可能不是最新的
+        let windowBounds = UIApplication.shared.zl.activeWindow?.bounds ?? view.bounds
+        
+        mainScrollView.frame = windowBounds
         resetContainerViewFrame()
         
-        topShadowView.frame = CGRect(x: 0, y: 0, width: view.zl.width, height: 150)
+        topShadowView.frame = CGRect(x: 0, y: 0, width: windowBounds.width, height: 150)
         topShadowLayer.frame = topShadowView.bounds
+        
         let cancelBtnW = localLanguageTextValue(.cancel)
             .zl.boundingRect(
                 font: ZLLayout.bottomToolTitleFont,
                 limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 28)
-            ).width
+            ).width + 20
         if isRTL() {
-            cancelBtn.frame = CGRect(x: view.zl.width - 20 - 28, y: insets.top, width: cancelBtnW, height: 30)
+            cancelBtn.frame = CGRect(x: windowBounds.width - 15 - cancelBtnW, y: insets.top, width: cancelBtnW, height: 30)
             redoBtn.frame = CGRect(x: 15, y: insets.top, width: 30, height: 30)
             undoBtn.frame = CGRect(x: redoBtn.zl.right + 15, y: insets.top, width: 30, height: 30)
         } else {
-            cancelBtn.frame = CGRect(x: 20, y: insets.top, width: cancelBtnW, height: 30)
-            redoBtn.frame = CGRect(x: view.zl.width - 15 - 30, y: insets.top, width: 30, height: 30)
+            cancelBtn.frame = CGRect(x: 15, y: insets.top, width: cancelBtnW, height: 30)
+            redoBtn.frame = CGRect(x: windowBounds.width - 15 - 30, y: insets.top, width: 30, height: 30)
             undoBtn.frame = CGRect(x: redoBtn.zl.left - 15 - 30, y: insets.top, width: 30, height: 30)
         }
         
-        bottomShadowView.frame = CGRect(x: 0, y: view.zl.height - 150 - insets.bottom, width: view.zl.width, height: 150 + insets.bottom)
+        bottomShadowView.frame = CGRect(x: 0, y: windowBounds.height - 150 - insets.bottom, width: windowBounds.width, height: 150 + insets.bottom)
         bottomShadowLayer.frame = bottomShadowView.bounds
         
         eraserBtn.frame = CGRect(x: 20, y: 30 + (drawColViewH - 36) / 2, width: 36, height: 36)
@@ -622,25 +625,25 @@ open class ZLEditImageViewController: UIViewController {
         eraserLineView.frame = CGRect(x: eraserBtn.zl.right + 11, y: eraserBtn.frame.midY - 10, width: 1, height: 20)
         drawColorCollectionView?.frame = CGRect(x: eraserLineView.zl.right + 11, y: 30, width: view.zl.width - eraserLineView.zl.right - 31, height: drawColViewH)
         
-        adjustCollectionView?.frame = CGRect(x: 20, y: 20, width: view.zl.width - 40, height: adjustColViewH)
+        adjustCollectionView?.frame = CGRect(x: 20, y: 20, width: windowBounds.width - 40, height: adjustColViewH)
         if ZLPhotoUIConfiguration.default().adjustSliderType == .vertical {
-            adjustSlider?.frame = CGRect(x: view.zl.width - 60, y: view.zl.height / 2 - 100, width: 60, height: 200)
+            adjustSlider?.frame = CGRect(x: windowBounds.width - 60, y: windowBounds.height / 2 - 100, width: 60, height: 200)
         } else {
             let sliderHeight: CGFloat = 60
-            let sliderWidth = UIDevice.current.userInterfaceIdiom == .phone ? view.zl.width - 100 : view.zl.width / 2
+            let sliderWidth = UIDevice.current.userInterfaceIdiom == .phone ? windowBounds.width - 100 : windowBounds.width / 2
             adjustSlider?.frame = CGRect(
-                x: (view.zl.width - sliderWidth) / 2,
+                x: (windowBounds.width - sliderWidth) / 2,
                 y: bottomShadowView.zl.top - sliderHeight,
                 width: sliderWidth,
                 height: sliderHeight
             )
         }
         
-        filterCollectionView?.frame = CGRect(x: 20, y: 0, width: view.zl.width - 40, height: filterColViewH)
+        filterCollectionView?.frame = CGRect(x: 20, y: 0, width: windowBounds.width - 40, height: filterColViewH)
         
         ashbinView.frame = CGRect(
-            x: (view.zl.width - Self.ashbinSize.width) / 2,
-            y: view.zl.height - Self.ashbinSize.height - 40,
+            x: (windowBounds.width - Self.ashbinSize.width) / 2,
+            y: windowBounds.height - Self.ashbinSize.height - 40,
             width: Self.ashbinSize.width,
             height: Self.ashbinSize.height
         )
@@ -656,9 +659,9 @@ open class ZLEditImageViewController: UIViewController {
         
         let doneBtnH = ZLLayout.bottomToolBtnH
         let doneBtnW = localLanguageTextValue(.editFinish).zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: doneBtnH)).width + 20
-        doneBtn.frame = CGRect(x: view.zl.width - 20 - doneBtnW, y: toolY - 2, width: doneBtnW, height: doneBtnH)
+        doneBtn.frame = CGRect(x: windowBounds.width - 20 - doneBtnW, y: toolY - 2, width: doneBtnW, height: doneBtnH)
         
-        let editToolWidth = view.zl.width - 20 - 20 - doneBtnW - 20
+        let editToolWidth = windowBounds.width - 20 - 20 - doneBtnW - 20
         editToolCollectionView.frame = CGRect(x: 20, y: toolY, width: editToolWidth, height: 30)
         
         if ZLPhotoUIConfiguration.default().shouldCenterTools {
@@ -693,6 +696,9 @@ open class ZLEditImageViewController: UIViewController {
     override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         shouldLayout = true
+        if view.window == nil {
+            viewDidLayoutSubviews()
+        }
     }
 
     private func generateFilterImages() {
