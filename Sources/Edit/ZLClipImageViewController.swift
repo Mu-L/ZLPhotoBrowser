@@ -399,8 +399,7 @@ class ZLClipImageViewController: UIViewController {
     
     /// 计算最大裁剪范围
     private func calculateMaxClipFrame(size: CGSize? = nil) -> CGRect {
-        let calSize = size ?? (UIApplication.shared.zl.activeWindow?.frame.size ?? .zero)
-        
+        let calSize = size ?? view.frame.size
         var insets = deviceSafeAreaInsets()
         insets.top += 20
         var rect = CGRect.zero

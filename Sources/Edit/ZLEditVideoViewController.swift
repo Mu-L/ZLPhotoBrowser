@@ -429,7 +429,7 @@ public class ZLEditVideoViewController: UIViewController {
             return
         }
         
-        let hud = ZLProgressHUD.show(toast: .processing)
+        let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
         ZLVideoManager.exportEditVideo(for: avAsset, range: getTimeRange()) { [weak self] url, error in
             hud.hide()
             guard let `self` = self else { return }

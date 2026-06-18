@@ -709,7 +709,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if cell is ZLLocalImagePreviewCell,
                let url = datas[currentIndex] as? URL {
-                let hud = ZLProgressHUD.show(toast: .processing)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
                 urlDownloadTask?.cancel()
                 urlDownloadTask = URLSession.shared.downloadTask(with: url) { localURL, _, error in
                     ZLMainAsync {
@@ -737,7 +737,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if cell is ZLNetVideoPreviewCell,
                let url = datas[currentIndex] as? URL {
-                let hud = ZLProgressHUD.show(toast: .processing)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
                 urlDownloadTask?.cancel()
                 urlDownloadTask = URLSession.shared.downloadTask(with: url) { localURL, _, error in
                     ZLMainAsync {
@@ -774,7 +774,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if (cell is ZLPhotoPreviewCell || cell is ZLGifPreviewCell),
                let asset = datas[currentIndex] as? PHAsset {
-                let hud = ZLProgressHUD.show(toast: .processing, timeout: ZLPhotoUIConfiguration.default().timeout)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window, timeout: ZLPhotoUIConfiguration.default().timeout)
                 hud.timeoutBlock = { [weak self] in
                     self?.cancelImageRequest()
                 }
@@ -799,7 +799,7 @@ extension ZLImagePreviewController: UICollectionViewDataSource, UICollectionView
             
             if cell is ZLVideoPreviewCell,
                let asset = datas[currentIndex] as? PHAsset {
-                let hud = ZLProgressHUD.show(toast: .processing)
+                let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
                 let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
                     .appendingPathComponent(UUID().uuidString)
                     .appendingPathExtension("mp4")

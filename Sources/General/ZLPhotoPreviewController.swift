@@ -682,7 +682,7 @@ class ZLPhotoPreviewController: UIViewController {
         }
         
         if model.type == .image || (!config.allowSelectGif && model.type == .gif) || (!config.allowSelectLivePhoto && model.type == .livePhoto) {
-            hud.show(timeout: ZLPhotoUIConfiguration.default().timeout)
+            hud.show(in: view.window, timeout: ZLPhotoUIConfiguration.default().timeout)
             requestAssetID = ZLPhotoManager.fetchImage(for: model.asset, size: model.previewSize) { [weak self] image, isDegraded in
                 if !isDegraded {
                     if let image {

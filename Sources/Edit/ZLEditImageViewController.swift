@@ -583,6 +583,18 @@ open class ZLEditImageViewController: UIViewController {
     
     override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        layout(size: view.bounds.size)
+    }
+    
+    override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        shouldLayout = true
+        if view.window == nil {
+            layout(size: size)
+        }
+    }
+    
+    private func layout(size: CGSize) {
         guard shouldLayout else { return }
         
         shouldLayout = false
@@ -593,8 +605,7 @@ open class ZLEditImageViewController: UIViewController {
         }
         insets.top = max(20, insets.top)
         
-        // 适配iPad，如果在其他界面改变了窗口大小，然后返回该界面时候，view.bounds可能不是最新的
-        let windowBounds = UIApplication.shared.zl.activeWindow?.bounds ?? view.bounds
+        let windowBounds = CGRect(origin: .zero, size: size)
         
         mainScrollView.frame = windowBounds
         resetContainerViewFrame()
@@ -690,14 +701,6 @@ open class ZLEditImageViewController: UIViewController {
         let screenRatio = mainScrollView.bounds.size.width / mainScrollView.bounds.size.height
         if abs(contentRatio - screenRatio) < 0.01 {
             mainScrollView.setZoomScale(mainScrollView.minimumZoomScale, animated: true)
-        }
-    }
-    
-    override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        shouldLayout = true
-        if view.window == nil {
-            viewDidLayoutSubviews()
         }
     }
 
@@ -1203,7 +1206,7 @@ open class ZLEditImageViewController: UIViewController {
             return
         }
         
-        let hud = ZLProgressHUD.show(toast: .processing)
+        let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
         DispatchQueue.main.async { [self] in
             resImage = buildImage()
             resImage = resImage.zl

@@ -1072,7 +1072,7 @@ class ZLThumbnailViewController: UIViewController {
     
     private func save(image: UIImage?, videoURL: URL?) {
         if let image {
-            let hud = ZLProgressHUD.show(toast: .processing)
+            let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
             ZLPhotoManager.saveImageToAlbum(image: image) { [weak self] error, asset in
                 if error == nil, let asset {
                     let model = ZLPhotoModel(asset: asset)
@@ -1083,7 +1083,7 @@ class ZLThumbnailViewController: UIViewController {
                 hud.hide()
             }
         } else if let videoURL {
-            let hud = ZLProgressHUD.show(toast: .processing)
+            let hud = ZLProgressHUD.show(toast: .processing, in: view.window)
             ZLPhotoManager.saveVideoToAlbum(url: videoURL) { [weak self] error, asset in
                 if error == nil, let asset {
                     let model = ZLPhotoModel(asset: asset)
@@ -1169,7 +1169,7 @@ class ZLThumbnailViewController: UIViewController {
         
         var requestAssetID: PHImageRequestID?
         
-        let hud = ZLProgressHUD.show(timeout: ZLPhotoUIConfiguration.default().timeout)
+        let hud = ZLProgressHUD.show(in: view.window, timeout: ZLPhotoUIConfiguration.default().timeout)
         hud.timeoutBlock = { [weak self] in
             showAlertView(localLanguageTextValue(.timeout), self)
             if let requestAssetID {
@@ -1204,7 +1204,7 @@ class ZLThumbnailViewController: UIViewController {
         let config = ZLPhotoConfiguration.default()
         
         var requestAssetID: PHImageRequestID?
-        let hud = ZLProgressHUD.show(timeout: ZLPhotoUIConfiguration.default().timeout)
+        let hud = ZLProgressHUD.show(in: view.window, timeout: ZLPhotoUIConfiguration.default().timeout)
         hud.timeoutBlock = { [weak self] in
             showAlertView(localLanguageTextValue(.timeout), self)
             if let requestAssetID {

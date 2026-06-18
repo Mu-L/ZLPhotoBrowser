@@ -131,8 +131,6 @@ class ZLInputTextViewController: UIViewController {
     
     private var shouldLayout = true
     
-    private var lastKeyboardFrame: CGRect = .zero
-    
     /// text, textColor, font, style
     var endInput: ((String, UIColor, UIFont, ZLInputTextStyle) -> Void)?
     
