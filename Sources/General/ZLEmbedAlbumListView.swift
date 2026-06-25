@@ -28,7 +28,7 @@ import UIKit
 import Photos
 
 class ZLEmbedAlbumListView: UIView {
-    static let rowH: CGFloat = 60
+    static let rowH: CGFloat = 55
     
     private var selectedAlbum: ZLAlbumListModel?
     
@@ -39,8 +39,6 @@ class ZLEmbedAlbumListView: UIView {
         view.backgroundColor = .zl.albumListBgColor
         view.tableFooterView = UIView()
         view.rowHeight = ZLEmbedAlbumListView.rowH
-        view.separatorInset = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-        view.separatorColor = .zl.separatorLineColor
         view.delegate = self
         view.dataSource = self
         ZLAlbumListCell.zl.register(view)
@@ -119,7 +117,7 @@ class ZLEmbedAlbumListView: UIView {
         
         let maxH: CGFloat
         if UIApplication.shared.zl.isPortrait {
-            maxH = min(frame.height * 0.7, contentH)
+            maxH = min(frame.height * 0.73, contentH)
         } else {
             maxH = min(frame.height * 0.8, contentH)
         }

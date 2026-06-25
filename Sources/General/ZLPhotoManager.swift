@@ -198,13 +198,21 @@ public class ZLPhotoManager: NSObject {
                 if collection.assetCollectionSubtype == .smartAlbumAllHidden {
                     return
                 }
-                if #available(iOS 11.0, *), collection.assetCollectionSubtype.rawValue > PHAssetCollectionSubtype.smartAlbumLongExposures.rawValue {
+                
+                let subtype = collection.assetCollectionSubtype
+                if subtype == .any {
                     return
                 }
+                
+                if #available(iOS 13.0, *), subtype == .smartAlbumUnableToUpload{
+                    return
+                }
+                
                 let result = PHAsset.fetchAssets(in: collection, options: option)
                 if result.count == 0 {
                     return
                 }
+                
                 let title = self.getCollectionTitle(collection)
                 
                 if collection.assetCollectionSubtype == .smartAlbumUserLibrary {
@@ -294,14 +302,20 @@ public class ZLPhotoManager: NSObject {
                 title = localLanguageTextValue(.depthEffect)
             case .smartAlbumLivePhotos:
                 title = localLanguageTextValue(.livePhotos)
+            case .smartAlbumAnimated:
+                title = localLanguageTextValue(.animated)
+            case .smartAlbumLongExposures:
+                title = localLanguageTextValue(.longExposures)
+            case .smartAlbumRAW:
+                title = localLanguageTextValue(.raw)
+            case .smartAlbumCinematic:
+                title = localLanguageTextValue(.cinematicVideos)
+            case .smartAlbumSpatial:
+                title = localLanguageTextValue(.spatialMedia)
+            case .smartAlbumScreenRecordings:
+                title = localLanguageTextValue(.screenRecordings)
             default:
                 title = collection.localizedTitle
-            }
-            
-            if #available(iOS 11.0, *) {
-                if collection.assetCollectionSubtype == PHAssetCollectionSubtype.smartAlbumAnimated {
-                    title = localLanguageTextValue(.animated)
-                }
             }
         }
         
