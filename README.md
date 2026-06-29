@@ -30,6 +30,7 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
 
 ### Features
 - [x] Support SwiftUI.
+- [x] Support iPad multi-window.
 - [x] Portrait and landscape.
 - [x] Two framework style.
 - [x] Support page loading.
